@@ -428,10 +428,14 @@ class DatabaseScheduler(Scheduler):
             logger.debug('DatabaseScheduler: initial read')
             initial = update = True
             self._initial_read = False
-        elif self.schedule_changed():
-            # when you updated the `PeriodicTasks` model's `last_update` field
-            logger.info('DatabaseScheduler: Schedule changed.')
-            update = True
+        else:
+            try:
+                if self.schedule_changed():
+                    update = True
+                    # when you updated the `PeriodicTasks` model's `last_update` field
+                    logger.info('DatabaseScheduler: Schedule changed.')
+            except sa.exc.DBAPIError as exc:
+                logger.exception('Database error while checking if the schedule changed: %r', exc)
 
         if update:
             self.sync()
