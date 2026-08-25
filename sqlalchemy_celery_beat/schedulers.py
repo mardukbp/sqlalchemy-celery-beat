@@ -7,6 +7,7 @@ import re
 from multiprocessing.util import Finalize
 
 import sqlalchemy as sa
+from sqlalchemy.exc import DBAPIError
 from celery import current_app, schedules
 from celery.beat import ScheduleEntry, Scheduler
 from celery.utils.log import get_logger
@@ -434,7 +435,7 @@ class DatabaseScheduler(Scheduler):
                     update = True
                     # when you updated the `PeriodicTasks` model's `last_update` field
                     logger.info('DatabaseScheduler: Schedule changed.')
-            except sa.exc.DBAPIError as exc:
+            except DBAPIError as exc:
                 logger.exception('Database error while checking if the schedule changed: %r', exc)
 
         if update:
